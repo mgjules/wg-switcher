@@ -1,0 +1,13 @@
+{
+  "name": "WG Switcher",
+  "description": "Automatically detect and switch among WireGuard configs",
+  "gettext-domain": "wg-switcher@mikeal.dev",
+  "shell-version": [
+    "3.36",
+    "3.37",
+    "3.38"
+  ],
+  "url": "https://github.com/JulesMike/wg-switcher",
+  "uuid": "wg-switcher@mikeal.dev",
+  "version": 1
+}
