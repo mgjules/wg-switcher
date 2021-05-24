@@ -33,13 +33,13 @@ const WGSwitcher = GObject.registerClass(
             this.services_section = new PopupMenu.PopupMenuSection();
             this.menu.addMenuItem(this.services_section);
 
-            this._activeService = "";
+            this._active_service = "";
             this._sourceId = 0;
             this._auto_update();
         }
 
         _load_services(){
-            this._servicesSwitches = [];
+            this._switches = [];
             this.services_section.actor.hide();
             if(this.services_section.numMenuItems > 0){
                 this.services_section.removeAll();
@@ -59,9 +59,9 @@ const WGSwitcher = GObject.registerClass(
                     filename.split(/_(.+)/)[1],
                     {active: false});
                 serviceSwitch.label.set_name(filename);
-                serviceSwitch.setToggleState(this._activeService === filename);
+                serviceSwitch.setToggleState(this._active_service === filename);
                 serviceSwitch.connect('toggled', this._switch_service.bind(this)); 
-                this._servicesSwitches.push(serviceSwitch);
+                this._switches.push(serviceSwitch);
                 this.services_section.addMenuItem(serviceSwitch);
                 this.services_section.actor.show();
             }
@@ -73,8 +73,8 @@ const WGSwitcher = GObject.registerClass(
                 const service = widget.label.get_name();
                 const status = ((value == true) ? 'up': 'down');
                 let cmd = ['/usr/bin/wg-quick', status, service];
-                if (this._activeService && this._activeService !== service) {
-                    cmd = ["/usr/bin/wg-quick", 'down', this._activeService, '&&', ...cmd]
+                if (this._active_service && this._active_service !== service) {
+                    cmd = ["/usr/bin/wg-quick", 'down', this._active_service, '&&', ...cmd]
                 }
                 let proc = Gio.Subprocess.new(
                     ['pkexec', 'bash', '-c', `${cmd.join(" ")}`],
@@ -96,7 +96,7 @@ const WGSwitcher = GObject.registerClass(
 
         _refresh(){
             try{
-                this._activeService = "";
+                this._active_service = "";
                 const proc = Gio.Subprocess.new(
                     ['wg'],
                     Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE
@@ -104,11 +104,11 @@ const WGSwitcher = GObject.registerClass(
                 proc.communicate_utf8_async(null, null, (proc, res) => {
                     try {
                         const [, , stderr] = proc.communicate_utf8_finish(res);
-                        this._servicesSwitches.forEach((serviceSwitch, index, array)=>{
+                        this._switches.forEach((serviceSwitch, index, array)=>{
                             const service = serviceSwitch.label.get_name();
                             const active = containsWord (stderr, service);
                             if(active){
-                                this._activeService = service;
+                                this._active_service = service;
                             }
                             GObject.signal_handlers_block_by_func(serviceSwitch,
                                                         this._switch_service);
@@ -120,7 +120,7 @@ const WGSwitcher = GObject.registerClass(
                         logError(e);
                     }
 
-                    this._set_icon_indicator(this._activeService !== "");
+                    this._set_icon_indicator(this._active_service !== "");
                 });
             } catch (e) {
                 logError(e);
