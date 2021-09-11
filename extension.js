@@ -56,7 +56,7 @@ const WGSwitcher = GObject.registerClass(
                 const filename = file_info.get_display_name().slice(0, -5);
 
                 const serviceSwitch = new PopupMenu.PopupSwitchMenuItem(
-                    filename.split(/_(.+)/)[1],
+                    filename,
                     {active: false});
                 serviceSwitch.label.set_name(filename);
                 serviceSwitch.setToggleState(this._active_service === filename);
