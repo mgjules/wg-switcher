@@ -22,7 +22,14 @@ const WGSwitcher = GObject.registerClass(
         _init(){
             super._init(St.Align.START);
 
-            Gtk.IconTheme.get_default().append_search_path(
+            let theme = Gtk.IconTheme.get_default();
+            if (theme == null) {
+                // Workaround due to lazy initialization on wayland
+                // as proposed by @fmuellner in GNOME mutter issue #960
+                theme = new Gtk.IconTheme();
+                theme.set_custom_theme(St.Settings.get().gtk_icon_theme);
+            }
+            theme.append_search_path(
                 Extension.dir.get_child('icons').get_path());
 
             const box = new St.BoxLayout();
